@@ -1,5 +1,8 @@
 from flask import Flask, render_template, request
 import mysql.connector
+import time
+import random
+
 
 app = Flask(__name__)
 
@@ -60,9 +63,34 @@ def filter_data():
 
     return render_template('table.html', result=result)
 
+def genData(driverid):
+    Time = int(time.time())
+    speed = random.randint(0,10) + 20*random.randint(1,10)
+    data = {}
+    data['time'] = Time
+    data['speed'] = speed
+    data['driverid'] = driverid
+    return data
 
-@app.route('/monitor')
+def execute(driverid):
+    global data_generation_running
+    data_generation_running = True
+    db = connect()
+    cursor = db.cursor()
+    while data_generation_running:
+        data = genData(driverid)
+        sql = "insert into RealTimeMonitor(DriverID, Speed,Time) values ({0},{1},{2})".format(data['driverid'], data['speed'],data['time'])
+        cursor.execute(sql)
+        db.commit()
+        time.sleep(1)  # sleep for 1 second
+    cursor.close()
+    db.close()
+
+@app.route('/monitor', methods=['GET', 'POST'])
 def monitor_data():
+    driverid = request.form.get('driverid')
+    if not data_generation_running:
+            Thread(target=execute, args=(driverid,)).start()
     return render_template('monitor.html')
 
 if __name__ == '__main__':
