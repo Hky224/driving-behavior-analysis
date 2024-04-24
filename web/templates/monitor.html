@@ -1,1 +1,14 @@
-hello
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Date Filter</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/styles.css') }}">
+</head>
+<body>
+    <h1>Summary</h1>
+    <form id="driver-id" method="post" action="/monitor">
+        <label for="driverid">Driver ID:</label>
+        <input type="string" id="driverid" name="driverid" required>
+    </form>
+</body>
+</html>
