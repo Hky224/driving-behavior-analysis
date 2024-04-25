@@ -89,7 +89,6 @@ def getdata():
         tmp_time = datas[-1][0]
     return json.dumps(datas)
 
-
 @app_blueprint.route('/monitor', methods=['POST'])
 def monitor_data():
     db = connect()
