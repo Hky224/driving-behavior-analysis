@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Date Filter</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='styles/styles.css') }}"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <h1>Summary</h1>
+    <form id="date-form" method="post" action="/filter">
+      <label for="start-date">Start Date:</label>
+      <input
+        type="date"
+        id="start-date"
+        name="start-date"
+        value="2017-01-01"
+        required
+      />
+      <label for="end-date">End Date:</label>
+      <input
+        type="date"
+        id="end-date"
+        name="end-date"
+        value="2017-01-10"
+        required
+      />
+      <button type="submit">Filter</button>
+    </form>
+    <form id="driver-id-form" method="post" action="/monitor">
+      <label for="driverid">Driver ID:</label>
+      <input type="string" id="driverid" name="driverid" required />
+      <button type="submit">Monitor</button>
+    </form>
+    <script>
+      $("#driver-id-form").submit(function (e) {
+        var driverid = $("#driverid").val(); // Get the driverid from the input field
+        localStorage.setItem("driverid", driverid); // Store the driverid in localStorage
+      });
+    </script>
+  </body>
+</html>
