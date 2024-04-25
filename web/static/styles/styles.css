@@ -5,6 +5,30 @@ table {
     width: 100%;
 }
 
+#chart-container {
+    margin-top: 50px;
+}
+
+.cube-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+  
+.box {
+    flex: 1;
+    border: 1px solid #ccc;
+    padding: 100px;
+    margin: 100px;
+    text-align: center;
+    min-width: 200px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 th, td {
     padding: 8px;
     text-align: left;
@@ -19,7 +43,7 @@ h1 {
     text-align: center;
 }
 
-#date-form {
+#date-form, #driver-id-form {
     margin-top: 20px;
     margin-bottom: 20px;
 }

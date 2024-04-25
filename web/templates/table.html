@@ -3,16 +3,19 @@
 <head>
     <title>Date Filter</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <script src="https://code.highcharts.com/highcharts.js"></script>
 </head>
 <body>
     <h1>Summary</h1>
-    <form id="date-form" method="post" action="/filter">
-        <label for="start-date">Start Date:</label>
-        <input type="date" id="start-date" name="start-date" value="2017-01-01" required>
-        <label for="end-date">End Date:</label>
-        <input type="date" id="end-date" name="end-date" value="2017-01-10" required>
-        <button type="submit">Filter</button>
-    </form>
+    <div class="cube-container">
+        <form id="date-form" method="post" action="/filter">
+            <label for="start-date">Start Date:</label>
+            <input type="date" id="start-date" name="start-date" value="2017-01-01" required>
+            <label for="end-date">End Date:</label>
+            <input type="date" id="end-date" name="end-date" value="2017-01-10" required>
+            <button type="submit">Filter</button>
+        </form>
+    </div>
     <div id="table-container">
         {% if result %}
         <table>
@@ -55,5 +58,94 @@
         </table>
         {% endif %}
     </div>
+    
+    <div id="chart-container"></div>
+    
+    <script>
+        // Extract the necessary data from the result
+        var labels = [];
+        var sumsRapidlySpeedup = [];
+        var sumsRapidlySlowdown = [];
+        var sumsNeutralSlide = [];
+        var sumsNeutralSlideFinished = [];
+        var sumsOverspeed = [];
+        var sumsOverspeedFinished = [];
+        var sumsFatigueDriving = [];
+        var sumsHthrottleStop = [];
+        var sumsOilLeak = [];
+
+        var result = JSON.parse('{{ result | tojson | safe }}');
+
+        result.forEach(function(row) {
+            labels.push(row[0] + ' - ' + row[1]);
+            sumsRapidlySpeedup.push(row[2]);
+            sumsRapidlySlowdown.push(row[3]);
+            sumsNeutralSlide.push(row[4]);
+            sumsNeutralSlideFinished.push(row[5]);
+            sumsOverspeed.push(row[7]);
+            sumsOverspeedFinished.push(row[8]);
+            sumsFatigueDriving.push(row[10]);
+            sumsHthrottleStop.push(row[11]);
+            sumsOilLeak.push(row[12]);
+        });
+
+        // Create the bar chart
+        Highcharts.chart('chart-container', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Result Chart'
+            },
+            xAxis: {
+                categories: labels,
+                crosshair: true
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Sum'
+                }
+            },
+            series: [
+                {
+                    name: 'Sum Rapidly Speedup',
+                    data: sumsRapidlySpeedup
+                },
+                {
+                    name: 'Sum Rapidly Slowdown',
+                    data: sumsRapidlySlowdown
+                },
+                {
+                    name: 'Sum Neutral Slide',
+                    data: sumsNeutralSlide
+                },
+                {
+                    name: 'Sum Neutral Slide Finished',
+                    data: sumsNeutralSlideFinished
+                },
+                {
+                    name: 'Sum Overspeed',
+                    data: sumsOverspeed
+                },
+                {
+                    name: 'Sum Overspeed Finished',
+                   data: sumsOverspeedFinished
+                },
+                {
+                    name: 'Sum Fatigue Driving',
+                    data: sumsFatigueDriving
+                },
+                {
+                    name: 'Sum Hthrottle Stop',
+                    data: sumsHthrottleStop
+                },
+                {
+                    name: 'Sum Oil Leak',
+                    data: sumsOilLeak
+                }
+            ]
+        });
+    </script>
 </body>
 </html>
