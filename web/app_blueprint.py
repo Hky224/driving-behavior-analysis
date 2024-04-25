@@ -3,9 +3,11 @@ from threading import Thread
 import mysql.connector
 import time
 import random
+import json
+from datetime import datetime
 
 app_blueprint = Blueprint('app_blueprint',__name__)
-
+data_generation_running = False
 def connect():
     mydb = mysql.connector.connect(
         host='comp4442-gp.crqk44cigx2u.us-east-1.rds.amazonaws.com',
@@ -63,25 +65,58 @@ def filter_data():
 
     return render_template('table.html', result=result)
 
+@app_blueprint.route('/monitor', methods=['GET', 'POST'])
+def monitor():
+    if request.method == 'POST':
+        return monitor_data()
+    else:
+        return getdata()
+
+def getdata():
+    global tmp_time
+    conn = connect()
+    cur = conn.cursor()
+    driverid = request.args.get('driverid')
+    sql = "select Time, Speed from RealTimeMonitor where DriverID = '"+driverid+"'"
+    print(sql)
+    cur.execute(sql)
+    datas = []
+    for i in cur.fetchall():
+        timestamp = datetime.fromtimestamp(i[0])  # Convert Unix timestamp to datetime
+        datas.append([timestamp.strftime('%Y-%m-%d %H:%M:%S'), i[1]])  # Format datetime as string
+
+    if len(datas) > 0 :
+        tmp_time = datas[-1][0]
+    return json.dumps(datas)
+
+
 @app_blueprint.route('/monitor', methods=['POST'])
 def monitor_data():
+    db = connect()
+    cursor = db.cursor()
+    delete_sql = "DELETE FROM RealTimeMonitor"
+    cursor.execute(delete_sql)
+    db.commit()
+    cursor.close()
+    db.close()
     global data_generation_running
     driverid = request.form['driverid']
     if not data_generation_running:
         Thread(target=execute, args=(driverid,)).start()
-    return render_template('monitor.html')
+    return render_template('monitor.html' ,driverid=driverid)
 
 def execute(driverid):
     data_generation_running = True
     db = connect()
     cursor = db.cursor()
+    
     while data_generation_running:
         data = genData(driverid)
-        sql = "insert into RealTimeMonitor(DriverID, Speed,Time) values ({0},{1},{2})".format(data['driverid'], data['speed'],data['time'])
+        sql = "insert into RealTimeMonitor(DriverID, Speed,Time) values ('{0}',{1},{2})".format(data['driverid'], data['speed'],data['time'])
         print(sql)
         cursor.execute(sql)
         db.commit()
-        time.sleep(1)  # sleep for 1 second
+        time.sleep(4)  # sleep for 1 second
     cursor.close()
     db.close()
 

@@ -1,14 +1,84 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Date Filter</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/styles.css') }}">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='styles/styles.css') }}"
+    />
+    <script src="http://cdn.hcharts.cn/jquery/jquery-1.8.3.min.js"></script>
+    <script src="http://cdn.hcharts.cn/highstock/highstock.js"></script>
+    <script src="http://cdn.hcharts.cn/highcharts/modules/exporting.js"></script>
+  </head>
+  <body>
     <h1>Summary</h1>
     <form id="driver-id" method="post" action="/monitor">
-        <label for="driverid">Driver ID:</label>
-        <input type="string" id="driverid" name="driverid" required>
+      <label for="driverid">Driver ID:</label>
+      <input type="text" id="driverid" name="driverid" required />
     </form>
-</body>
+    <div id="container" style="min-width: 400px; height: 400px"></div>
+
+    <script type="text/javascript">
+      var driverid = localStorage.getItem("driverid"); // Get the driverid from localStorage
+
+      console.log("JavaScript file loaded");
+      $(document).ready(function () {
+        console.log("Making request to /monitor");
+        var driverid = localStorage.getItem("driverid");
+        $.getJSON(
+          "/monitor?driverid=" + encodeURIComponent(driverid),
+          function (data) {
+            console.log(data);
+            // Create the chart
+            $("#container").highcharts("StockChart", {
+              chart: {
+                events: {
+                  load: function () {
+                    console.log("load function called");
+                    var chart = $("#container").highcharts();
+                    var series = chart.series[0];
+                    //2 seconds interval
+                    setInterval(function () {
+                      var driverid = localStorage.getItem("driverid"); // Get the driverid from localStorage
+                      console.log("Driver ID: " + driverid);
+                      $.getJSON(
+                        "/monitor?driverid=" + encodeURIComponent(driverid)
+                      )
+                        .done(function (res) {
+                          console.log("Request successful");
+                          console.log(res); // Log the server's response
+                          $.each(res, function (i, v) {
+                            series.addPoint(v);
+                          });
+                        })
+                        .fail(function (jqXHR, textStatus, errorThrown) {
+                          console.log("Error: " + textStatus);
+                          console.log("ErrorThrown: " + errorThrown);
+                        });
+                    }, 10000);
+                  },
+                },
+              },
+              rangeSelector: {
+                selected: 1,
+              },
+              title: {
+                text: "Real-time Monitoring for " + driverid,
+              },
+              series: [
+                {
+                  name: "Speed",
+                  data: data,
+                  tooltip: {
+                    valueSuffix: "Km/h",
+                  },
+                },
+              ],
+            });
+          }
+        );
+      });
+    </script>
+  </body>
 </html>
