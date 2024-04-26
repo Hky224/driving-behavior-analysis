@@ -106,13 +106,13 @@ def execute(driverid):
         print(sql)
         cursor.execute(sql)
         db.commit()
-        time.sleep(4)
+        time.sleep(10)
     cursor.close()
     db.close()
 
 def genData(driverid):
     Time = int(time.time())
-    speed = random.randint(0,10) + 20*random.randint(1,10)
+    speed = 3*random.randint(0,10) + 8*random.randint(1,10)
     data = {}
     data['time'] = Time
     data['speed'] = speed

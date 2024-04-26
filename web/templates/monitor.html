@@ -12,11 +12,12 @@
     <script src="http://cdn.hcharts.cn/highcharts/modules/exporting.js"></script>
   </head>
   <body>
-    <h1>Summary</h1>
-    <div id="container" style="min-width: 400px; height: 400px"></div>
+    <div id="container" style="min-width: 400px; height: 500px"></div>
+    <div id="alert" class="close"></div>
 
     <script type="text/javascript">
       var driverid = localStorage.getItem("driverid"); // Get the driverid from localStorage
+      var overspeed = 70;
 
       console.log("JavaScript file loaded");
       $(document).ready(function () {
@@ -46,15 +47,28 @@
                           console.log(res); // Log the server's response
                           $.each(res, function (i, v) {
                             series.addPoint(v);
+                            if (v[1] > overspeed) {
+                              // Assuming the speed is the second element in the array
+                              $("#alert").text(
+                                "Overspeeding! Please slow down."
+                              ); // Display the alert message
+                              $("#alert").removeClass("close");
+                            } else {
+                              $("#alert").text(""); // Clear the alert message
+                              $("#alert").addClass("close");
+                            }
                           });
                         })
                         .fail(function (jqXHR, textStatus, errorThrown) {
                           console.log("Error: " + textStatus);
                           console.log("ErrorThrown: " + errorThrown);
                         });
-                    }, 10000);
+                    }, 30000);
                   },
                 },
+              },
+              time: {
+                useUTC: false,
               },
               rangeSelector: {
                 selected: 1,
@@ -62,6 +76,7 @@
               title: {
                 text: "Real-time Monitoring for " + driverid,
               },
+
               series: [
                 {
                   name: "Speed",
