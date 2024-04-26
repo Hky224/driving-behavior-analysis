@@ -62,7 +62,6 @@
     <div id="chart-container"></div>
     
     <script>
-        // Extract the necessary data from the result
         var labels = [];
         var sumsRapidlySpeedup = [];
         var sumsRapidlySlowdown = [];
@@ -77,7 +76,7 @@
         var result = JSON.parse('{{ result | tojson | safe }}');
 
         result.forEach(function(row) {
-            labels.push(row[0] + ' - ' + row[1]);
+            labels.push(row[0]);
             sumsRapidlySpeedup.push(row[2]);
             sumsRapidlySlowdown.push(row[3]);
             sumsNeutralSlide.push(row[4]);
@@ -89,7 +88,7 @@
             sumsOilLeak.push(row[12]);
         });
 
-        // Create the bar chart
+        // bar chart
         Highcharts.chart('chart-container', {
             chart: {
                 type: 'column'
@@ -130,7 +129,7 @@
                 },
                 {
                     name: 'Sum Overspeed Finished',
-                   data: sumsOverspeedFinished
+                    data: sumsOverspeedFinished
                 },
                 {
                     name: 'Sum Fatigue Driving',

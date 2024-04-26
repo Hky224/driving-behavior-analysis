@@ -24,41 +24,32 @@ def index():
 
 @app_blueprint.route('/filter', methods=['POST'])
 def filter_data():
+    # get start and end date from the form
     start_date = request.form['start-date']
     end_date = request.form['end-date']
 
     conn = connect()
     cursor = conn.cursor()
 
-    chunk_size = 1000  # Define the chunk size for each query
-    offset = 0
-    result = []
+    query = """
+        SELECT DriverID, CarPlateNumber,
+        SUM(isRapidlySpeedup) AS SumRapidlySpeedup,
+        SUM(isRapidlySlowdown) AS SumRapidlySlowdown,
+        SUM(isNeutralSlide) AS SumNeutralSlide,
+        SUM(isNeutralSlideFinished) AS SumNeutralSlideFinished,
+        SUM(neutralSlideTime) AS SumNeutralSlideTime,
+        SUM(isOverspeed) AS SumOverspeed,
+        SUM(isOverspeedFinished) AS SumOverspeedFinished,
+        SUM(overspeedTime) AS SumOverspeedTime,
+        SUM(isFatigueDriving) AS SumFatigueDriving,
+        SUM(isHthrottleStop) AS SumHthrottleStop,
+        SUM(isOilLeak) AS SumOilLeak
+    FROM Records
+    WHERE DrivingDate BETWEEN %s AND %s
+    GROUP BY DriverID, CarPlateNumber;"""
 
-    while True:
-        query = """
-            SELECT DriverID, CarPlateNumber,
-            SUM(isRapidlySpeedup) AS SumRapidlySpeedup,
-            SUM(isRapidlySlowdown) AS SumRapidlySlowdown,
-            SUM(isNeutralSlide) AS SumNeutralSlide,
-            SUM(isNeutralSlideFinished) AS SumNeutralSlideFinished,
-            SUM(neutralSlideTime) AS SumNeutralSlideTime,
-            SUM(isOverspeed) AS SumOverspeed,
-            SUM(isOverspeedFinished) AS SumOverspeedFinished,
-            SUM(overspeedTime) AS SumOverspeedTime,
-            SUM(isFatigueDriving) AS SumFatigueDriving,
-            SUM(isHthrottleStop) AS SumHthrottleStop,
-            SUM(isOilLeak) AS SumOilLeak
-        FROM Records
-        WHERE DrivingDate BETWEEN %s AND %s
-        GROUP BY DriverID, CarPlateNumber
-        LIMIT %s OFFSET %s;"""
-
-        cursor.execute(query, (start_date, end_date, chunk_size, offset))
-        rows = cursor.fetchall()
-        if not rows:  # No more data to fetch
-            break
-        result.extend(rows)
-        offset += chunk_size
+    cursor.execute(query, (start_date, end_date))
+    result = cursor.fetchall()
 
     cursor.close()
     conn.close()
@@ -115,7 +106,7 @@ def execute(driverid):
         print(sql)
         cursor.execute(sql)
         db.commit()
-        time.sleep(4)  # sleep for 1 second
+        time.sleep(4)
     cursor.close()
     db.close()
 

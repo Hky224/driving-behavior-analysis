@@ -8,11 +8,6 @@ table {
     width: 100%;
 }
 
-.highcharts-menu-item {
-    background-color: #f2f2f2a1;
-    border-radius: 5px;
-}
-
 #chart-container {
     margin-top: 50px;
 }
